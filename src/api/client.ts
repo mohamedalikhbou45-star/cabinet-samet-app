@@ -118,10 +118,29 @@ export const api = {
 
   messages: () => request<{ messages: MessageDto[] }>("/api/messages"),
 
+  sendMessage: (body: string) =>
+    request<{ message: MessageDto }>("/api/messages", {
+      method: "POST",
+      body: JSON.stringify({ body }),
+    }),
+
   registerPushToken: (token: string, platform: string) =>
     request<{ success: boolean }>("/api/push-token", {
       method: "POST",
       body: JSON.stringify({ token, platform }),
+    }),
+
+  forgotPassword: (email: string) =>
+    request<{ ok: boolean }>("/api/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+      skipAuth: true,
+    }),
+
+  changePassword: (currentPassword: string, newPassword: string) =>
+    request<{ ok: boolean }>("/api/profile/password", {
+      method: "POST",
+      body: JSON.stringify({ currentPassword, newPassword }),
     }),
 };
 
@@ -140,5 +159,6 @@ export type MessageDto = {
   id: string;
   body: string;
   read: boolean;
+  sender: "ADMIN" | "CLIENT";
   createdAt: string;
 };

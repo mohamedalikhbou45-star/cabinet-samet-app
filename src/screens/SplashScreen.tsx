@@ -2,13 +2,15 @@ import React from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { Logo } from "../components/Logo";
 import { colors } from "../theme/colors";
+import { useLanguage } from "../i18n/LanguageContext";
 
 export function SplashScreen() {
+  const { t } = useLanguage();
   return (
     <View style={styles.container}>
       <Logo size={88} />
-      <Text style={styles.title}>Cabinet Samet</Text>
-      <Text style={styles.subtitle}>Comptabilité digitale</Text>
+      <Text style={styles.title}>{t("splash.title")}</Text>
+      <Text style={styles.subtitle}>{t("splash.subtitle")}</Text>
       <ActivityIndicator color={colors.green} style={{ marginTop: 32 }} />
     </View>
   );

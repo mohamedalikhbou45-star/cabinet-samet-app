@@ -1,12 +1,13 @@
-import React from "react";
-import { Text } from "react-native";
+import React, { useState } from "react";
+import { View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { DashboardScreen } from "../screens/DashboardScreen";
 import { UploadScreen } from "../screens/UploadScreen";
 import { HistoryScreen } from "../screens/HistoryScreen";
 import { MessagesScreen } from "../screens/MessagesScreen";
 import { ProfileScreen } from "../screens/ProfileScreen";
-import { colors } from "../theme/colors";
+import { Chatbot } from "../components/Chatbot";
+import { CustomTabBar } from "./CustomTabBar";
 
 export type AppTabsParamList = {
   Dashboard: undefined;
@@ -18,42 +19,31 @@ export type AppTabsParamList = {
 
 const Tab = createBottomTabNavigator<AppTabsParamList>();
 
-const ICONS: Record<keyof AppTabsParamList, string> = {
-  Dashboard: "🏠",
-  Upload: "➕",
-  History: "🗂️",
-  Messages: "💬",
-  Profile: "👤",
-};
-
-const LABELS: Record<keyof AppTabsParamList, string> = {
-  Dashboard: "Accueil",
-  Upload: "Déposer",
-  History: "Historique",
-  Messages: "Messages",
-  Profile: "Profil",
-};
-
 export function AppTabs() {
+  const [activeTab, setActiveTab] = useState<keyof AppTabsParamList>("Dashboard");
+
   return (
-    <Tab.Navigator
-      screenOptions={({ route }) => ({
-        headerShown: false,
-        tabBarActiveTintColor: colors.green,
-        tabBarInactiveTintColor: colors.textMuted,
-        tabBarIcon: () => (
-          <Text style={{ fontSize: 18 }}>
-            {ICONS[route.name as keyof AppTabsParamList]}
-          </Text>
-        ),
-        tabBarLabel: LABELS[route.name as keyof AppTabsParamList],
-      })}
-    >
-      <Tab.Screen name="Dashboard" component={DashboardScreen} />
-      <Tab.Screen name="Upload" component={UploadScreen} />
-      <Tab.Screen name="History" component={HistoryScreen} />
-      <Tab.Screen name="Messages" component={MessagesScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
-    </Tab.Navigator>
+    <View style={{ flex: 1 }}>
+      <Tab.Navigator
+        screenOptions={{ headerShown: false }}
+        tabBar={(props) => <CustomTabBar {...props} />}
+        screenListeners={{
+          state: (e) => {
+            const state = e.data.state as {
+              index: number;
+              routeNames: (keyof AppTabsParamList)[];
+            };
+            setActiveTab(state.routeNames[state.index]);
+          },
+        }}
+      >
+        <Tab.Screen name="Dashboard" component={DashboardScreen} />
+        <Tab.Screen name="Upload" component={UploadScreen} />
+        <Tab.Screen name="History" component={HistoryScreen} />
+        <Tab.Screen name="Messages" component={MessagesScreen} />
+        <Tab.Screen name="Profile" component={ProfileScreen} />
+      </Tab.Navigator>
+      {activeTab !== "Messages" && <Chatbot />}
+    </View>
   );
 }

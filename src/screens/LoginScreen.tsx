@@ -7,17 +7,20 @@ import {
   Text,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { Logo } from "../components/Logo";
+import { AnimatedLogo } from "../components/AnimatedLogo";
 import { TextField } from "../components/TextField";
 import { Button } from "../components/Button";
 import { useAuth } from "../context/AuthContext";
-import { colors } from "../theme/colors";
+import { useLanguage } from "../i18n/LanguageContext";
+import { colors, shadow } from "../theme/colors";
 import type { AuthStackParamList } from "../navigation/AuthStack";
 
 export function LoginScreen() {
   const { login } = useAuth();
+  const { t } = useLanguage();
   const navigation =
     useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
   const [email, setEmail] = useState("");
@@ -28,96 +31,117 @@ export function LoginScreen() {
   async function handleSubmit() {
     setError(null);
     if (!email || !password) {
-      setError("Merci de renseigner votre email et mot de passe.");
+      setError(t("login.errorMissing"));
       return;
     }
     setLoading(true);
     try {
       await login(email, password);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Échec de la connexion.");
+      setError(e instanceof Error ? e.message : t("login.errorGeneric"));
     } finally {
       setLoading(false);
     }
   }
 
   return (
+    <SafeAreaView style={styles.flex}>
     <KeyboardAvoidingView
       style={styles.flex}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.header}>
-          <Logo />
-          <Text style={styles.title}>Cabinet Samet</Text>
-          <Text style={styles.subtitle}>Espace client</Text>
+          <AnimatedLogo />
+          <Text style={styles.title}>{t("login.headerTitle")}</Text>
+          <Text style={styles.subtitle}>{t("login.headerSubtitle")}</Text>
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Connexion</Text>
+          <Text style={styles.cardTitle}>{t("login.cardTitle")}</Text>
 
           {error && <Text style={styles.error}>{error}</Text>}
 
           <TextField
-            label="Adresse email"
+            label={t("login.emailLabel")}
             value={email}
             onChangeText={setEmail}
             autoCapitalize="none"
             keyboardType="email-address"
-            placeholder="vous@exemple.fr"
           />
           <TextField
-            label="Mot de passe"
+            label={t("login.passwordLabel")}
             value={password}
             onChangeText={setPassword}
             secureTextEntry
-            placeholder="••••••••"
           />
 
-          <Button title="Se connecter" onPress={handleSubmit} loading={loading} />
+          <Button
+            title={t("login.submit")}
+            onPress={handleSubmit}
+            loading={loading}
+            size="lg"
+          />
+
+          <Text
+            style={styles.forgotLink}
+            onPress={() => navigation.navigate("ForgotPassword")}
+          >
+            {t("login.forgot")}
+          </Text>
         </View>
 
         <Text style={styles.footer}>
-          Pas encore de compte ?{" "}
+          {t("login.noAccount")}{" "}
           <Text
             style={styles.link}
             onPress={() => navigation.navigate("Register")}
           >
-            Créer un compte
+            {t("login.createAccount")}
           </Text>
         </Text>
       </ScrollView>
     </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.navy },
   container: { flexGrow: 1, padding: 24, justifyContent: "center" },
-  header: { alignItems: "center", marginBottom: 32 },
+  header: { alignItems: "center", marginBottom: 36 },
   title: {
-    marginTop: 16,
-    fontSize: 22,
+    marginTop: 18,
+    fontSize: 26,
     fontWeight: "800",
     color: colors.white,
+    letterSpacing: -0.4,
   },
-  subtitle: { marginTop: 2, fontSize: 13, color: colors.green, fontWeight: "600" },
+  subtitle: { marginTop: 4, fontSize: 14, color: colors.green, fontWeight: "700" },
   card: {
     backgroundColor: colors.white,
-    borderRadius: 16,
-    padding: 24,
+    borderRadius: 20,
+    padding: 26,
+    ...shadow.floating,
   },
   cardTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "800",
     color: colors.navy,
-    marginBottom: 16,
+    marginBottom: 20,
   },
   error: {
     color: colors.danger,
     marginBottom: 12,
     fontSize: 13,
     fontWeight: "600",
+  },
+  forgotLink: {
+    textAlign: "center",
+    marginTop: 16,
+    fontSize: 13.5,
+    fontWeight: "700",
+    color: colors.navy,
   },
   footer: {
     textAlign: "center",

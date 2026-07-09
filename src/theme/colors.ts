@@ -1,11 +1,11 @@
 export const colors = {
   green: "#86BC25",
   greenHover: "#78a821",
-  navy: "#0B2545",
-  navySoft: "#123a63",
+  navy: "#1a2744",
+  navySoft: "#26365c",
   ink: "#0a0a0a",
   white: "#ffffff",
-  background: "#f7f8fa",
+  background: "#f8f9fa",
   border: "#e5e7eb",
   textMuted: "#6b7280",
   danger: "#dc2626",
@@ -17,21 +17,22 @@ export const colors = {
   successBg: "#d1fae5",
 };
 
-export const statusStyles: Record<string, { bg: string; text: string }> = {
-  EN_ATTENTE: { bg: colors.warningBg, text: "#92400e" },
-  EN_TRAITEMENT: { bg: colors.infoBg, text: "#1e40af" },
-  TRAITE: { bg: colors.successBg, text: "#065f46" },
-};
+export const radius = 16;
+export const spacing = 16;
 
-export const statusLabels: Record<string, string> = {
-  EN_ATTENTE: "En attente",
-  EN_TRAITEMENT: "En traitement",
-  TRAITE: "Traité",
-};
-
-export const documentTypeLabels: Record<string, string> = {
-  FACTURE: "Facture",
-  LEASING: "Leasing",
-  RELEVE_BANCAIRE: "Relevé bancaire",
-  AUTRE: "Autre",
+export const shadow = {
+  card: {
+    shadowColor: colors.navy,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    elevation: 3,
+  },
+  floating: {
+    shadowColor: colors.navy,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
+    elevation: 8,
+  },
 };

@@ -8,23 +8,27 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import * as ImagePicker from "expo-image-picker";
+import { SafeAreaView } from "react-native-safe-area-context";
+import * as DocumentPicker from "expo-document-picker";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useNavigation } from "@react-navigation/native";
 import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import type { AppTabsParamList } from "../navigation/AppTabs";
-import { ScreenHeader } from "../components/ScreenHeader";
 import { Button } from "../components/Button";
-import { colors, documentTypeLabels } from "../theme/colors";
+import { colors, radius, shadow, spacing } from "../theme/colors";
+import { useTheme } from "../theme/useTheme";
+import { useLanguage } from "../i18n/LanguageContext";
 import { api } from "../api/client";
 
 type PickedFile = { uri: string; name: string; type: string };
 
-const TYPES = Object.keys(documentTypeLabels);
+const TYPES = ["FACTURE", "LEASING", "RELEVE_BANCAIRE", "AUTRE"];
 
 export function UploadScreen() {
   const navigation =
     useNavigation<BottomTabNavigationProp<AppTabsParamList>>();
+  const t = useTheme();
+  const { t: tr } = useLanguage();
   const [file, setFile] = useState<PickedFile | null>(null);
   const [docType, setDocType] = useState("AUTRE");
   const [showCamera, setShowCamera] = useState(false);
@@ -32,22 +36,21 @@ export function UploadScreen() {
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const cameraRef = React.useRef<CameraView>(null);
 
-  async function pickFromGallery() {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert("Permission requise", "Autorisez l'accès à vos photos.");
-      return;
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.8,
+  async function pickFile() {
+    // "*/*" ouvre le sélecteur natif iOS complet : Photos, Fichiers
+    // (iCloud Drive, Google Drive et autres fournisseurs installés), avec
+    // tous les types (PDF, JPG, PNG, XLSX, DOCX, etc.).
+    const result = await DocumentPicker.getDocumentAsync({
+      type: "*/*",
+      copyToCacheDirectory: true,
+      multiple: false,
     });
     if (!result.canceled && result.assets[0]) {
       const asset = result.assets[0];
       setFile({
         uri: asset.uri,
-        name: asset.fileName ?? `document-${Date.now()}.jpg`,
-        type: asset.mimeType ?? "image/jpeg",
+        name: asset.name,
+        type: asset.mimeType ?? "application/octet-stream",
       });
     }
   }
@@ -56,7 +59,7 @@ export function UploadScreen() {
     if (!cameraPermission?.granted) {
       const res = await requestCameraPermission();
       if (!res.granted) {
-        Alert.alert("Permission requise", "Autorisez l'accès à la caméra.");
+        Alert.alert(tr("upload.permissionTitle"), tr("upload.permissionCamera"));
         return;
       }
     }
@@ -80,13 +83,13 @@ export function UploadScreen() {
     setUploading(true);
     try {
       await api.uploadDocument(file, docType);
-      Alert.alert("Envoyé", "Votre document a bien été déposé.");
+      Alert.alert(tr("upload.sentTitle"), tr("upload.sentBody"));
       setFile(null);
       navigation.navigate("Dashboard");
     } catch (e) {
       Alert.alert(
-        "Erreur",
-        e instanceof Error ? e.message : "Échec de l'envoi du document."
+        tr("upload.errorTitle"),
+        e instanceof Error ? e.message : tr("upload.errorGeneric")
       );
     } finally {
       setUploading(false);
@@ -99,7 +102,7 @@ export function UploadScreen() {
         <CameraView ref={cameraRef} style={styles.flex} facing="back" />
         <View style={styles.cameraControls}>
           <TouchableOpacity onPress={() => setShowCamera(false)}>
-            <Text style={styles.cameraCancel}>Annuler</Text>
+            <Text style={styles.cameraCancel}>{tr("upload.cancel")}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.shutter} onPress={takePhoto} />
           <View style={{ width: 60 }} />
@@ -109,125 +112,230 @@ export function UploadScreen() {
   }
 
   return (
-    <ScrollView style={styles.flex} contentContainerStyle={{ paddingBottom: 40 }}>
-      <ScreenHeader
-        title="Déposer un document"
-        subtitle="Prenez une photo ou choisissez un fichier dans votre galerie."
-      />
+    <SafeAreaView
+      style={[styles.flex, { backgroundColor: t.background }]}
+      edges={["top"]}
+    >
+    <ScrollView
+      style={styles.flex}
+      contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={styles.hero}>
+        <View style={styles.heroIcon}>
+          <Text style={styles.heroIconText}>📤</Text>
+        </View>
+        <Text style={[styles.title, { color: t.text }]}>
+          {tr("upload.title")}
+        </Text>
+        <Text style={[styles.subtitle, { color: t.textMuted }]}>
+          {tr("upload.subtitle")}
+        </Text>
+      </View>
 
       <View style={styles.actions}>
-        <TouchableOpacity style={styles.actionCard} onPress={openCamera}>
-          <Text style={styles.actionIcon}>📷</Text>
-          <Text style={styles.actionLabel}>Prendre une photo</Text>
+        <TouchableOpacity
+          style={[
+            styles.actionCard,
+            styles.actionCardGreen,
+            { backgroundColor: t.card },
+          ]}
+          onPress={openCamera}
+          activeOpacity={0.85}
+        >
+          <View style={[styles.actionIconWrap, styles.actionIconWrapGreen]}>
+            <Text style={styles.actionIcon}>📷</Text>
+          </View>
+          <Text style={[styles.actionLabel, { color: t.text }]}>
+            {tr("upload.takePhoto")}
+          </Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.actionCard} onPress={pickFromGallery}>
-          <Text style={styles.actionIcon}>🖼️</Text>
-          <Text style={styles.actionLabel}>Choisir un fichier</Text>
+        <TouchableOpacity
+          style={[
+            styles.actionCard,
+            styles.actionCardNavy,
+            { backgroundColor: t.card },
+          ]}
+          onPress={pickFile}
+          activeOpacity={0.85}
+        >
+          <View style={[styles.actionIconWrap, styles.actionIconWrapNavy]}>
+            <Text style={styles.actionIcon}>📁</Text>
+          </View>
+          <Text style={[styles.actionLabel, { color: t.text }]}>
+            {tr("upload.chooseFile")}
+          </Text>
         </TouchableOpacity>
       </View>
 
       {file && (
-        <View style={styles.previewCard}>
-          <Image source={{ uri: file.uri }} style={styles.preview} />
-          <Text style={styles.fileName} numberOfLines={1}>
+        <View style={[styles.previewCard, { backgroundColor: t.card }]}>
+          {file.type.startsWith("image/") ? (
+            <Image source={{ uri: file.uri }} style={styles.preview} />
+          ) : (
+            <View style={[styles.filePreview, { backgroundColor: t.background }]}>
+              <Text style={styles.filePreviewIcon}>📄</Text>
+            </View>
+          )}
+          <Text style={[styles.fileName, { color: t.textMuted }]} numberOfLines={1}>
             {file.name}
           </Text>
         </View>
       )}
 
-      <Text style={styles.label}>Type de document</Text>
+      <Text style={[styles.label, { color: t.text }]}>{tr("upload.typeLabel")}</Text>
       <View style={styles.typeRow}>
-        {TYPES.map((t) => (
+        {TYPES.map((docTypeKey) => (
           <TouchableOpacity
-            key={t}
-            onPress={() => setDocType(t)}
-            style={[styles.typeChip, docType === t && styles.typeChipActive]}
+            key={docTypeKey}
+            onPress={() => setDocType(docTypeKey)}
+            style={[
+              styles.typeChip,
+              { backgroundColor: t.card, borderColor: t.border },
+              docType === docTypeKey && styles.typeChipActive,
+            ]}
           >
             <Text
               style={[
                 styles.typeChipText,
-                docType === t && styles.typeChipTextActive,
+                { color: t.text },
+                docType === docTypeKey && styles.typeChipTextActive,
               ]}
             >
-              {documentTypeLabels[t]}
+              {tr(`documentType.${docTypeKey}`)}
             </Text>
           </TouchableOpacity>
         ))}
       </View>
 
       <Button
-        title="Envoyer le document"
+        title={tr("upload.submit")}
         onPress={handleUpload}
         loading={uploading}
         disabled={!file}
-        style={{ marginHorizontal: 20, marginTop: 24 }}
+        size="lg"
+        style={styles.submit}
       />
     </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: colors.background },
+  flex: { flex: 1 },
+  content: {
+    flexGrow: 1,
+    justifyContent: "center",
+    paddingHorizontal: spacing,
+    paddingVertical: 24,
+  },
+  hero: { alignItems: "center", marginBottom: 24 },
+  heroIcon: {
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    backgroundColor: colors.green,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+    ...shadow.floating,
+  },
+  heroIconText: { fontSize: 40 },
+  title: {
+    fontSize: 26,
+    fontWeight: "800",
+    letterSpacing: -0.4,
+    textAlign: "center",
+  },
+  subtitle: {
+    marginTop: 8,
+    fontSize: 15,
+    textAlign: "center",
+    paddingHorizontal: 12,
+  },
   actions: {
     flexDirection: "row",
-    gap: 12,
-    paddingHorizontal: 20,
+    gap: 14,
+    marginBottom: 20,
   },
   actionCard: {
     flex: 1,
-    backgroundColor: colors.white,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingVertical: 24,
+    borderRadius: radius,
+    paddingVertical: 28,
     alignItems: "center",
+    ...shadow.card,
   },
-  actionIcon: { fontSize: 28, marginBottom: 8 },
-  actionLabel: { fontSize: 13, fontWeight: "600", color: colors.navy },
+  actionCardGreen: {
+    borderWidth: 1.5,
+    borderColor: "#dbedb8",
+  },
+  actionCardNavy: {
+    borderWidth: 1.5,
+    borderColor: "#d7dee8",
+  },
+  actionIconWrap: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 12,
+  },
+  actionIconWrapGreen: { backgroundColor: "#eaf6d3" },
+  actionIconWrapNavy: { backgroundColor: "#e2e8f2" },
+  actionIcon: { fontSize: 32 },
+  actionLabel: {
+    fontSize: 15,
+    fontWeight: "700",
+    textAlign: "center",
+  },
   previewCard: {
-    margin: 20,
-    backgroundColor: colors.white,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: 12,
+    borderRadius: radius,
+    padding: 14,
+    marginBottom: 20,
+    ...shadow.card,
   },
   preview: {
     width: "100%",
     height: 200,
-    borderRadius: 8,
-    marginBottom: 8,
+    borderRadius: 12,
+    marginBottom: 10,
     backgroundColor: colors.border,
   },
-  fileName: { fontSize: 13, color: colors.textMuted },
+  filePreview: {
+    width: "100%",
+    height: 120,
+    borderRadius: 12,
+    marginBottom: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  filePreviewIcon: { fontSize: 44 },
+  fileName: { fontSize: 13.5, fontWeight: "600" },
   label: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: colors.navy,
-    marginHorizontal: 20,
-    marginTop: 12,
-    marginBottom: 8,
+    fontSize: 14,
+    fontWeight: "700",
+    marginBottom: 10,
   },
   typeRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
-    paddingHorizontal: 20,
+    gap: 10,
+    marginBottom: 28,
   },
   typeChip: {
-    borderWidth: 1,
-    borderColor: colors.border,
+    borderWidth: 1.5,
     borderRadius: 999,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    backgroundColor: colors.white,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
   },
   typeChipActive: {
     backgroundColor: colors.green,
     borderColor: colors.green,
   },
-  typeChipText: { fontSize: 13, color: colors.navy, fontWeight: "600" },
+  typeChipText: { fontSize: 13.5, fontWeight: "700" },
   typeChipTextActive: { color: colors.navy },
+  submit: { ...shadow.floating },
   cameraControls: {
     position: "absolute",
     bottom: 40,

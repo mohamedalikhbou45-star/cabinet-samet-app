@@ -4,14 +4,19 @@ import {
   RefreshControl,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
-import { useFocusEffect } from "@react-navigation/native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
+import type { AppTabsParamList } from "../navigation/AppTabs";
 import { api, DocumentDto, MessageDto } from "../api/client";
-import { ScreenHeader } from "../components/ScreenHeader";
 import { StatusBadge } from "../components/StatusBadge";
-import { colors, documentTypeLabels } from "../theme/colors";
+import { radius, shadow, spacing } from "../theme/colors";
+import { useTheme } from "../theme/useTheme";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../i18n/LanguageContext";
 
 type Stats = {
   total: number;
@@ -20,8 +25,21 @@ type Stats = {
   traite: number;
 };
 
+function initials(name?: string) {
+  if (!name) return "?";
+  const parts = name.trim().split(/\s+/);
+  return parts
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase())
+    .join("");
+}
+
 export function DashboardScreen() {
   const { user } = useAuth();
+  const t = useTheme();
+  const { t: tr } = useLanguage();
+  const navigation =
+    useNavigation<BottomTabNavigationProp<AppTabsParamList>>();
   const [stats, setStats] = useState<Stats | null>(null);
   const [documents, setDocuments] = useState<DocumentDto[]>([]);
   const [messages, setMessages] = useState<MessageDto[]>([]);
@@ -52,59 +70,123 @@ export function DashboardScreen() {
 
   const cards = stats
     ? [
-        { label: "Documents déposés", value: stats.total },
-        { label: "En attente", value: stats.enAttente },
-        { label: "En traitement", value: stats.enTraitement },
-        { label: "Traités", value: stats.traite },
+        { label: tr("dashboard.statTotal"), value: stats.total, dot: t.navy },
+        { label: tr("dashboard.statPending"), value: stats.enAttente, dot: t.warning },
+        { label: tr("dashboard.statProcessing"), value: stats.enTraitement, dot: t.info },
+        { label: tr("dashboard.statDone"), value: stats.traite, dot: t.success },
       ]
     : [];
 
   return (
+    <SafeAreaView
+      style={[styles.flex, { backgroundColor: t.background }]}
+      edges={["top"]}
+    >
     <FlatList
       style={styles.flex}
       data={documents}
       keyExtractor={(item) => item.id}
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor={t.green}
+        />
       }
       ListHeaderComponent={
         <View>
-          <ScreenHeader
-            title={`Bonjour ${user?.name?.split(" ")[0] ?? ""}`}
-            subtitle="Vue d'ensemble de vos documents comptables."
-          />
+          <View style={styles.header}>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.greeting, { color: t.text }]}>
+                {tr("dashboard.greeting", { name: user?.name?.split(" ")[0] ?? "" })}
+              </Text>
+              <Text style={[styles.subtitle, { color: t.textMuted }]}>
+                {tr("dashboard.subtitle")}
+              </Text>
+            </View>
+            <TouchableOpacity
+              activeOpacity={0.75}
+              onPress={() => navigation.navigate("Profile")}
+              style={[styles.avatar, { backgroundColor: t.green }]}
+            >
+              <Text style={[styles.avatarText, { color: t.navy }]}>
+                {initials(user?.name)}
+              </Text>
+            </TouchableOpacity>
+          </View>
 
           {messages.length > 0 && (
-            <View style={styles.messagesCard}>
-              <Text style={styles.sectionTitle}>Messages du cabinet</Text>
+            <TouchableOpacity
+              activeOpacity={0.75}
+              onPress={() => navigation.navigate("Messages")}
+              style={[styles.messagesCard, { backgroundColor: t.card }]}
+            >
+              <View style={styles.messagesCardHeader}>
+                <Text style={[styles.sectionTitleInline, { color: t.text }]}>
+                  💬 {tr("dashboard.recentMessages")}
+                </Text>
+                <Text style={[styles.messagesCardChevron, { color: t.textMuted }]}>
+                  ›
+                </Text>
+              </View>
               {messages.map((m) => (
-                <View key={m.id} style={styles.messageRow}>
-                  <Text style={styles.messageBody}>{m.body}</Text>
+                <View
+                  key={m.id}
+                  style={[styles.messageRow, { borderTopColor: t.border }]}
+                >
+                  <Text style={[styles.messageBody, { color: t.text }]}>
+                    <Text
+                      style={[
+                        styles.messagePrefix,
+                        { color: m.sender === "CLIENT" ? t.textMuted : t.green },
+                      ]}
+                    >
+                      {m.sender === "CLIENT"
+                        ? tr("messages.mePrefix")
+                        : tr("messages.csPrefix")}
+                    </Text>
+                    {m.body}
+                  </Text>
                 </View>
               ))}
-            </View>
+            </TouchableOpacity>
           )}
 
           <View style={styles.grid}>
             {cards.map((c) => (
-              <View key={c.label} style={styles.card}>
-                <Text style={styles.cardValue}>{c.value}</Text>
-                <Text style={styles.cardLabel}>{c.label}</Text>
+              <View
+                key={c.label}
+                style={[styles.card, { backgroundColor: t.card }]}
+              >
+                <View style={styles.cardTop}>
+                  <View style={[styles.dot, { backgroundColor: c.dot }]} />
+                  <Text style={[styles.cardLabel, { color: t.textMuted }]}>
+                    {c.label}
+                  </Text>
+                </View>
+                <Text style={[styles.cardValue, { color: t.text }]}>
+                  {c.value}
+                </Text>
               </View>
             ))}
           </View>
 
-          <Text style={styles.sectionTitle}>Documents récents</Text>
+          <Text style={[styles.sectionTitle, { color: t.text }]}>
+            {tr("dashboard.recentDocuments")}
+          </Text>
         </View>
       }
       renderItem={({ item }) => (
-        <View style={styles.docRow}>
+        <View style={[styles.docRow, { backgroundColor: t.card }]}>
           <View style={styles.docInfo}>
-            <Text style={styles.docName} numberOfLines={1}>
+            <Text
+              style={[styles.docName, { color: t.text }]}
+              numberOfLines={1}
+            >
               {item.originalName}
             </Text>
-            <Text style={styles.docMeta}>
-              {documentTypeLabels[item.type] ?? item.type} ·{" "}
+            <Text style={[styles.docMeta, { color: t.textMuted }]}>
+              {tr(`documentType.${item.type}`)} ·{" "}
               {new Date(item.createdAt).toLocaleDateString("fr-FR")}
             </Text>
           </View>
@@ -112,71 +194,102 @@ export function DashboardScreen() {
         </View>
       )}
       ListEmptyComponent={
-        <Text style={styles.empty}>
-          Vous n'avez encore déposé aucun document.
+        <Text style={[styles.empty, { color: t.textMuted }]}>
+          {tr("dashboard.empty")}
         </Text>
       }
       contentContainerStyle={{ paddingBottom: 40 }}
     />
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: colors.background },
+  flex: { flex: 1 },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: spacing,
+    paddingTop: 16,
+    paddingBottom: 20,
+  },
+  greeting: { fontSize: 26, fontWeight: "800", letterSpacing: -0.4 },
+  subtitle: { marginTop: 6, fontSize: 14.5 },
+  avatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 12,
+    ...shadow.card,
+  },
+  avatarText: { fontSize: 17, fontWeight: "800" },
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    paddingHorizontal: 16,
+    paddingHorizontal: spacing,
     gap: 12,
-    marginBottom: 8,
+    marginBottom: 12,
   },
   card: {
-    backgroundColor: colors.white,
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: radius,
+    padding: 18,
     width: "47%",
-    borderWidth: 1,
-    borderColor: colors.border,
+    ...shadow.card,
   },
-  cardValue: { fontSize: 28, fontWeight: "800", color: colors.navy },
-  cardLabel: { marginTop: 4, fontSize: 13, color: colors.textMuted },
+  cardTop: { flexDirection: "row", alignItems: "center", marginBottom: 10 },
+  dot: { width: 8, height: 8, borderRadius: 4, marginRight: 6 },
+  cardValue: { fontSize: 32, fontWeight: "800" },
+  cardLabel: { fontSize: 13, fontWeight: "600" },
   sectionTitle: {
+    fontSize: 18,
+    fontWeight: "800",
+    marginHorizontal: spacing,
+    marginTop: 24,
+    marginBottom: 12,
+  },
+  messagesCardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  sectionTitleInline: {
     fontSize: 16,
+    fontWeight: "800",
+    marginBottom: 6,
+  },
+  messagesCardChevron: {
+    fontSize: 22,
     fontWeight: "700",
-    color: colors.navy,
-    marginHorizontal: 20,
-    marginTop: 20,
-    marginBottom: 8,
   },
   messagesCard: {
-    backgroundColor: colors.white,
-    marginHorizontal: 20,
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
+    marginHorizontal: spacing,
+    marginBottom: 16,
+    borderRadius: radius,
+    padding: 18,
+    ...shadow.card,
   },
-  messageRow: { paddingVertical: 6 },
-  messageBody: { fontSize: 14, color: colors.ink },
+  messageRow: { paddingVertical: 8, borderTopWidth: StyleSheet.hairlineWidth },
+  messageBody: { fontSize: 14.5, lineHeight: 20 },
+  messagePrefix: { fontWeight: "800" },
   docRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: colors.white,
-    marginHorizontal: 20,
-    marginBottom: 8,
-    padding: 14,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: colors.border,
+    marginHorizontal: spacing,
+    marginBottom: 10,
+    padding: 16,
+    borderRadius: 14,
+    ...shadow.card,
   },
   docInfo: { flex: 1, marginRight: 12 },
-  docName: { fontSize: 14, fontWeight: "600", color: colors.ink },
-  docMeta: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
+  docName: { fontSize: 15, fontWeight: "700" },
+  docMeta: { fontSize: 12.5, marginTop: 3 },
   empty: {
     textAlign: "center",
-    color: colors.textMuted,
     marginTop: 20,
-    marginHorizontal: 20,
+    marginHorizontal: spacing,
+    fontSize: 15,
   },
 });

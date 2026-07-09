@@ -1,12 +1,13 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { colors } from "../theme/colors";
+import { colors, shadow } from "../theme/colors";
 
 export function Logo({ size = 56 }: { size?: number }) {
   return (
     <View
       style={[
         styles.box,
+        shadow.floating,
         { width: size, height: size, borderRadius: size * 0.22 },
       ]}
     >
