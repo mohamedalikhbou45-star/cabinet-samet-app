@@ -7,6 +7,7 @@ const API_URL =
 
 const TOKEN_KEY = "cabinet-samet:token";
 const USER_KEY = "cabinet-samet:user";
+const DEVICE_TOKEN_KEY = "cabinet-samet:deviceToken";
 
 export type ApiUser = {
   id: string;
@@ -32,6 +33,14 @@ export async function getStoredUser(): Promise<ApiUser | null> {
 
 export async function clearSession() {
   await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY]);
+}
+
+export async function getDeviceToken() {
+  return AsyncStorage.getItem(DEVICE_TOKEN_KEY);
+}
+
+export async function saveDeviceToken(token: string) {
+  await AsyncStorage.setItem(DEVICE_TOKEN_KEY, token);
 }
 
 class ApiError extends Error {
@@ -72,10 +81,32 @@ async function request<T>(
 }
 
 export const api = {
-  login: (email: string, password: string) =>
-    request<{ token: string; user: ApiUser }>("/api/mobile/login", {
+  login: async (email: string, password: string) => {
+    const deviceToken = await getDeviceToken();
+    return request<
+      | { requires2FA: true; userId: string }
+      | { token: string; user: ApiUser }
+    >("/api/mobile/login", {
       method: "POST",
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, deviceToken }),
+      skipAuth: true,
+    });
+  },
+
+  verify2FA: (userId: string, code: string, remember: boolean) =>
+    request<{ token: string; user: ApiUser; deviceToken?: string }>(
+      "/api/mobile/verify-2fa",
+      {
+        method: "POST",
+        body: JSON.stringify({ userId, code, remember }),
+        skipAuth: true,
+      }
+    ),
+
+  resend2FA: (userId: string) =>
+    request<{ ok: boolean }>("/api/mobile/resend-2fa", {
+      method: "POST",
+      body: JSON.stringify({ userId }),
       skipAuth: true,
     }),
 

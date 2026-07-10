@@ -7,7 +7,7 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "backgroundColor": "#0B2545",
+    "backgroundColor": "#1a2744",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "fr.cabinetsamet.app",
@@ -19,7 +19,7 @@
     "android": {
       "package": "fr.cabinetsamet.app",
       "adaptiveIcon": {
-        "backgroundColor": "#0B2545",
+        "backgroundColor": "#1a2744",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -31,7 +31,14 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-splash-screen",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash.png",
+          "backgroundColor": "#1a2744",
+          "imageWidth": 220
+        }
+      ],
       [
         "expo-camera",
         {

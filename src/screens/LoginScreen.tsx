@@ -36,7 +36,10 @@ export function LoginScreen() {
     }
     setLoading(true);
     try {
-      await login(email, password);
+      const result = await login(email, password);
+      if (result.requires2FA) {
+        navigation.navigate("Verify2FA", { userId: result.userId, email });
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : t("login.errorGeneric"));
     } finally {

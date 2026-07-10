@@ -6,6 +6,7 @@ import { ForgotPasswordScreen } from "../screens/ForgotPasswordScreen";
 import { TermsAcceptScreen } from "../screens/TermsAcceptScreen";
 import { TermsTextScreen } from "../screens/TermsTextScreen";
 import { PrivacyTextScreen } from "../screens/PrivacyTextScreen";
+import { Verify2FAScreen } from "../screens/Verify2FAScreen";
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -14,6 +15,7 @@ export type AuthStackParamList = {
   TermsAccept: { name: string; email: string; password: string };
   TermsText: undefined;
   PrivacyText: undefined;
+  Verify2FA: { userId: string; email: string };
 };
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
@@ -25,6 +27,7 @@ export function AuthStack() {
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
       <Stack.Screen name="TermsAccept" component={TermsAcceptScreen} />
+      <Stack.Screen name="Verify2FA" component={Verify2FAScreen} />
       <Stack.Screen
         name="TermsText"
         component={TermsTextScreen}
