@@ -22,7 +22,16 @@ import { api } from "../api/client";
 
 type PickedFile = { uri: string; name: string; type: string };
 
-const TYPES = ["FACTURE", "LEASING", "RELEVE_BANCAIRE", "AUTRE"];
+const TYPES = [
+  "BANQUE",
+  "CAISSE",
+  "VENTE",
+  "ACHAT",
+  "OD_PAIE",
+  "OD_FISCALE",
+  "OD",
+  "AUTRES",
+];
 
 export function UploadScreen() {
   const navigation =
@@ -30,7 +39,7 @@ export function UploadScreen() {
   const t = useTheme();
   const { t: tr } = useLanguage();
   const [file, setFile] = useState<PickedFile | null>(null);
-  const [docType, setDocType] = useState("AUTRE");
+  const [docType, setDocType] = useState("AUTRES");
   const [showCamera, setShowCamera] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();

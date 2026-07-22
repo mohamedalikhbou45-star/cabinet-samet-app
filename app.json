@@ -13,7 +13,8 @@
       "bundleIdentifier": "fr.cabinetsamet.app",
       "infoPlist": {
         "NSCameraUsageDescription": "Cabinet Samet a besoin de la caméra pour photographier vos documents.",
-        "NSPhotoLibraryUsageDescription": "Cabinet Samet a besoin d'accéder à vos photos pour joindre un document existant."
+        "NSPhotoLibraryUsageDescription": "Cabinet Samet a besoin d'accéder à vos photos pour joindre un document existant.",
+        "NSFaceIDUsageDescription": "Cabinet Samet utilise Face ID pour vous connecter plus rapidement et en toute sécurité."
       }
     },
     "android": {

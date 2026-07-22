@@ -1,5 +1,5 @@
 import React from "react";
-import { Alert, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { LANGUAGES } from "../i18n/translations";
 import { useLanguage } from "../i18n/LanguageContext";
 import { useTheme } from "../theme/useTheme";
@@ -35,14 +35,8 @@ export function LanguagePickerModal({
                 lang === l.code && { borderColor: theme.green, backgroundColor: theme.background },
               ]}
               onPress={async () => {
-                const needsRestart = await setLang(l.code);
+                await setLang(l.code);
                 onClose();
-                if (needsRestart) {
-                  Alert.alert(
-                    t("profile.rtlRestartTitle"),
-                    t("profile.rtlRestartBody")
-                  );
-                }
               }}
             >
               <Text style={styles.flag}>{l.flag}</Text>

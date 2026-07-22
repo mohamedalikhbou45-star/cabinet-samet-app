@@ -43,6 +43,23 @@ const fr: Dict = {
   "verify2fa.errorGeneric": "Une erreur est survenue. Réessayez.",
   "verify2fa.errorResendGeneric": "Impossible de renvoyer le code.",
 
+  "login.keepSignedIn": "Rester connecté",
+
+  "biometric.promptTitle": "Activer Face ID",
+  "biometric.promptMessage": "Activer Face ID pour vous connecter plus rapidement ?",
+  "biometric.enable": "Activer",
+  "biometric.later": "Plus tard",
+  "biometric.authPrompt": "Authentifiez-vous pour continuer",
+
+  "lock.title": "Cabinet Samet verrouillé",
+  "lock.subtitle": "Déverrouillez avec Face ID pour continuer.",
+  "lock.unlock": "Déverrouiller avec Face ID",
+  "lock.retry": "Réessayer",
+  "lock.usePassword": "Se connecter avec mot de passe",
+  "lock.failed": "Authentification échouée.",
+
+  "profile.faceId": "Face ID",
+
   "register.title": "Créer un compte",
   "register.nameLabel": "Nom complet",
   "register.companyLabel": "Société (optionnel)",
@@ -135,10 +152,15 @@ const fr: Dict = {
   "upload.sentBody": "Votre document a bien été déposé.",
   "upload.errorTitle": "Erreur",
   "upload.errorGeneric": "Échec de l'envoi du document.",
-  "documentType.FACTURE": "Facture",
-  "documentType.LEASING": "Leasing",
-  "documentType.RELEVE_BANCAIRE": "Relevé bancaire",
-  "documentType.AUTRE": "Autre",
+  "documentType.BANQUE": "Banque",
+  "documentType.CAISSE": "Caisse",
+  "documentType.VENTE": "Vente",
+  "documentType.ACHAT": "Achat",
+  "documentType.OD_PAIE": "OD Paie",
+  "documentType.OD_FISCALE": "OD Fiscale",
+  "documentType.OD": "OD",
+  "documentType.AUTRES": "Autres",
+  "history.allTypes": "Tous les types",
 
   "history.title": "Historique",
   "history.subtitle": "Tous vos documents déposés et leur statut.",
@@ -173,9 +195,6 @@ const fr: Dict = {
   "profile.appVersion": "Version de l'app",
   "profile.logout": "Se déconnecter",
   "profile.languagePickerTitle": "Choisir la langue",
-  "profile.rtlRestartTitle": "Redémarrage nécessaire",
-  "profile.rtlRestartBody":
-    "L'application va redémarrer pour appliquer l'affichage de droite à gauche.",
 
   "chatbot.headerTitle": "Assistant Cabinet Samet",
   "chatbot.demoMode": "Mode démo",
@@ -224,6 +243,23 @@ const en: Dict = {
   "verify2fa.verifying": "Verifying...",
   "verify2fa.errorGeneric": "Something went wrong. Please try again.",
   "verify2fa.errorResendGeneric": "Unable to resend the code.",
+
+  "login.keepSignedIn": "Keep me signed in",
+
+  "biometric.promptTitle": "Enable Face ID",
+  "biometric.promptMessage": "Enable Face ID to sign in faster?",
+  "biometric.enable": "Enable",
+  "biometric.later": "Later",
+  "biometric.authPrompt": "Authenticate to continue",
+
+  "lock.title": "Cabinet Samet locked",
+  "lock.subtitle": "Unlock with Face ID to continue.",
+  "lock.unlock": "Unlock with Face ID",
+  "lock.retry": "Try again",
+  "lock.usePassword": "Sign in with password",
+  "lock.failed": "Authentication failed.",
+
+  "profile.faceId": "Face ID",
 
   "register.title": "Create an account",
   "register.nameLabel": "Full name",
@@ -317,10 +353,15 @@ const en: Dict = {
   "upload.sentBody": "Your document has been submitted.",
   "upload.errorTitle": "Error",
   "upload.errorGeneric": "Failed to send the document.",
-  "documentType.FACTURE": "Invoice",
-  "documentType.LEASING": "Leasing",
-  "documentType.RELEVE_BANCAIRE": "Bank statement",
-  "documentType.AUTRE": "Other",
+  "documentType.BANQUE": "Bank",
+  "documentType.CAISSE": "Cash",
+  "documentType.VENTE": "Sales",
+  "documentType.ACHAT": "Purchases",
+  "documentType.OD_PAIE": "Payroll entry",
+  "documentType.OD_FISCALE": "Tax entry",
+  "documentType.OD": "Journal entry",
+  "documentType.AUTRES": "Other",
+  "history.allTypes": "All types",
 
   "history.title": "History",
   "history.subtitle": "All your submitted documents and their status.",
@@ -355,9 +396,6 @@ const en: Dict = {
   "profile.appVersion": "App version",
   "profile.logout": "Log out",
   "profile.languagePickerTitle": "Choose language",
-  "profile.rtlRestartTitle": "Restart needed",
-  "profile.rtlRestartBody":
-    "The app will restart to apply right-to-left display.",
 
   "chatbot.headerTitle": "Cabinet Samet Assistant",
   "chatbot.demoMode": "Demo mode",
@@ -406,6 +444,23 @@ const ar: Dict = {
   "verify2fa.verifying": "جارٍ التحقق...",
   "verify2fa.errorGeneric": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
   "verify2fa.errorResendGeneric": "تعذر إعادة إرسال الرمز.",
+
+  "login.keepSignedIn": "البقاء متصلاً",
+
+  "biometric.promptTitle": "تفعيل Face ID",
+  "biometric.promptMessage": "هل تريد تفعيل Face ID لتسجيل الدخول بشكل أسرع؟",
+  "biometric.enable": "تفعيل",
+  "biometric.later": "لاحقًا",
+  "biometric.authPrompt": "يرجى التحقق من هويتك للمتابعة",
+
+  "lock.title": "تطبيق Cabinet Samet مقفل",
+  "lock.subtitle": "افتح القفل باستخدام Face ID للمتابعة.",
+  "lock.unlock": "فتح القفل باستخدام Face ID",
+  "lock.retry": "إعادة المحاولة",
+  "lock.usePassword": "تسجيل الدخول بكلمة المرور",
+  "lock.failed": "فشلت المصادقة.",
+
+  "profile.faceId": "Face ID",
 
   "register.title": "إنشاء حساب",
   "register.nameLabel": "الاسم الكامل",
@@ -498,10 +553,15 @@ const ar: Dict = {
   "upload.sentBody": "تم إرسال مستندك بنجاح.",
   "upload.errorTitle": "خطأ",
   "upload.errorGeneric": "فشل إرسال المستند.",
-  "documentType.FACTURE": "فاتورة",
-  "documentType.LEASING": "تأجير",
-  "documentType.RELEVE_BANCAIRE": "كشف حساب بنكي",
-  "documentType.AUTRE": "أخرى",
+  "documentType.BANQUE": "البنك",
+  "documentType.CAISSE": "الصندوق",
+  "documentType.VENTE": "المبيعات",
+  "documentType.ACHAT": "المشتريات",
+  "documentType.OD_PAIE": "قيد الرواتب",
+  "documentType.OD_FISCALE": "قيد ضريبي",
+  "documentType.OD": "قيد محاسبي",
+  "documentType.AUTRES": "أخرى",
+  "history.allTypes": "جميع الأنواع",
 
   "history.title": "السجل",
   "history.subtitle": "جميع مستنداتك المرسلة وحالتها.",
@@ -536,9 +596,6 @@ const ar: Dict = {
   "profile.appVersion": "إصدار التطبيق",
   "profile.logout": "تسجيل الخروج",
   "profile.languagePickerTitle": "اختر اللغة",
-  "profile.rtlRestartTitle": "إعادة التشغيل مطلوبة",
-  "profile.rtlRestartBody":
-    "سيتم إعادة تشغيل التطبيق لتطبيق العرض من اليمين إلى اليسار.",
 
   "chatbot.headerTitle": "مساعد مكتب سامت",
   "chatbot.demoMode": "وضع تجريبي",

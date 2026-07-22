@@ -15,6 +15,12 @@ import { useTheme } from "../theme/useTheme";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../i18n/LanguageContext";
 import { LANGUAGES } from "../i18n/translations";
+import {
+  authenticateWithBiometrics,
+  isBiometricAvailable,
+  isBiometricEnabled,
+  setBiometricEnabled,
+} from "../lib/biometric";
 import type { AppTabsParamList } from "../navigation/AppTabs";
 import type { AppStackParamList } from "../navigation/AppStack";
 
@@ -105,12 +111,25 @@ export function ProfileScreen() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [documents, setDocuments] = useState<DocumentDto[]>([]);
   const [langPickerOpen, setLangPickerOpen] = useState(false);
+  const [biometricAvailable, setBiometricAvailable] = useState(false);
+  const [biometricOn, setBiometricOn] = useState(false);
 
   useEffect(() => {
     AsyncStorage.getItem(NOTIFICATIONS_KEY).then((v) => {
       if (v !== null) setNotificationsEnabled(v === "true");
     });
+    isBiometricAvailable().then(setBiometricAvailable);
+    isBiometricEnabled().then(setBiometricOn);
   }, []);
+
+  async function toggleBiometric(value: boolean) {
+    if (value) {
+      const ok = await authenticateWithBiometrics(tr("biometric.authPrompt"));
+      if (!ok) return;
+    }
+    setBiometricOn(value);
+    await setBiometricEnabled(value);
+  }
 
   const load = useCallback(async () => {
     try {
@@ -215,6 +234,22 @@ export function ProfileScreen() {
             textColor={t.text}
             mutedColor={t.textMuted}
           />
+          {biometricAvailable && (
+            <Row
+              icon="🆔"
+              label={tr("profile.faceId")}
+              borderColor={t.border}
+              textColor={t.text}
+              mutedColor={t.textMuted}
+              right={
+                <Switch
+                  value={biometricOn}
+                  onValueChange={toggleBiometric}
+                  trackColor={{ true: t.green }}
+                />
+              }
+            />
+          )}
         </View>
 
         <SectionTitle color={t.textMuted}>{tr("profile.sectionDocuments")}</SectionTitle>

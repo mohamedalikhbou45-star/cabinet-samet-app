@@ -42,7 +42,14 @@ export function RegisterScreen() {
     try {
       await api.register({ name, email, company, password });
       if (await hasAcceptedTerms()) {
-        await login(email, password);
+        const result = await login(email, password, true);
+        if (result.requires2FA) {
+          navigation.navigate("Verify2FA", {
+            userId: result.userId,
+            email,
+            keepSignedIn: true,
+          });
+        }
       } else {
         navigation.navigate("TermsAccept", { name, email, password });
       }

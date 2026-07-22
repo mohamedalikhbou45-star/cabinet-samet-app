@@ -32,11 +32,12 @@ export function TermsAcceptScreen() {
     setLoading(true);
     try {
       await markTermsAccepted();
-      const result = await login(params.email, params.password);
+      const result = await login(params.email, params.password, true);
       if (result.requires2FA) {
         navigation.navigate("Verify2FA", {
           userId: result.userId,
           email: params.email,
+          keepSignedIn: true,
         });
       }
     } catch (e) {

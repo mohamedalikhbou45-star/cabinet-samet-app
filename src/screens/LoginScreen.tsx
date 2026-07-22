@@ -13,6 +13,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { AnimatedLogo } from "../components/AnimatedLogo";
 import { TextField } from "../components/TextField";
 import { Button } from "../components/Button";
+import { Checkbox } from "../components/Checkbox";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../i18n/LanguageContext";
 import { colors, shadow } from "../theme/colors";
@@ -25,6 +26,7 @@ export function LoginScreen() {
     useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [keepSignedIn, setKeepSignedIn] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -36,9 +38,13 @@ export function LoginScreen() {
     }
     setLoading(true);
     try {
-      const result = await login(email, password);
+      const result = await login(email, password, keepSignedIn);
       if (result.requires2FA) {
-        navigation.navigate("Verify2FA", { userId: result.userId, email });
+        navigation.navigate("Verify2FA", {
+          userId: result.userId,
+          email,
+          keepSignedIn,
+        });
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : t("login.errorGeneric"));
@@ -78,6 +84,13 @@ export function LoginScreen() {
             onChangeText={setPassword}
             secureTextEntry
           />
+
+          <Checkbox
+            checked={keepSignedIn}
+            onPress={() => setKeepSignedIn((v) => !v)}
+          >
+            <Text style={styles.checkboxLabel}>{t("login.keepSignedIn")}</Text>
+          </Checkbox>
 
           <Button
             title={t("login.submit")}
@@ -139,6 +152,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "600",
   },
+  checkboxLabel: { fontSize: 13.5, color: colors.ink },
   forgotLink: {
     textAlign: "center",
     marginTop: 16,

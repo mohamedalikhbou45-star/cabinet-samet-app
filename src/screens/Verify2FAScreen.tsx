@@ -86,7 +86,7 @@ export function Verify2FAScreen() {
     setError("");
     setLoading(true);
     try {
-      await verify2FA(params.userId, code, remember);
+      await verify2FA(params.userId, code, remember, params.keepSignedIn);
     } catch (e) {
       const message = e instanceof Error ? e.message : t("verify2fa.errorGeneric");
       setError(message);

@@ -17,10 +17,10 @@ function isRTLLang(lang: Lang) {
 
 type LanguageContextValue = {
   lang: Lang;
+  /** true uniquement quand la langue active est l'arabe — dérivé directement
+   * de `lang`, jamais du flag natif global I18nManager.isRTL (voir plus bas). */
   isRTL: boolean;
-  /** Renvoie true si le changement de langue nécessite un redémarrage complet
-   * de l'app pour appliquer la direction RTL (bascule ar <-> fr/en). */
-  setLang: (lang: Lang) => Promise<boolean>;
+  setLang: (lang: Lang) => Promise<void>;
   t: (key: string, params?: Record<string, string>) => string;
 };
 
@@ -28,6 +28,25 @@ const LanguageContext = createContext<LanguageContextValue | null>(null);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [lang, setLangState] = useState<Lang>("fr");
+
+  // I18nManager.forceRTL est un réglage natif GLOBAL et PERSISTANT (il ne
+  // s'applique qu'après redémarrage complet de l'app, et reste actif tant
+  // qu'un nouveau redémarrage n'a pas eu lieu). L'utiliser pour basculer la
+  // direction à chaque changement de langue provoquait ce bug : après être
+  // passé en arabe une fois, TOUS les écrans (y compris en français/anglais)
+  // restaient mis en miroir tant que l'app n'était pas redémarrée une
+  // seconde fois. On ne s'appuie donc plus dessus pour la mise en page :
+  // chaque écran qui a besoin d'un miroir RTL lit `isRTL` du contexte
+  // (dérivé de la langue courante, réactif immédiatement, sans redémarrage).
+  //
+  // Si une session précédente avait déjà forcé le RTL natif (avant ce fix),
+  // on nettoie ce réglage résiduel une bonne fois pour toutes.
+  useEffect(() => {
+    if (I18nManager.isRTL) {
+      I18nManager.allowRTL(false);
+      I18nManager.forceRTL(false);
+    }
+  }, []);
 
   useEffect(() => {
     AsyncStorage.getItem(LANGUAGE_KEY).then((stored) => {
@@ -40,20 +59,6 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const setLang = useCallback(async (next: Lang) => {
     await AsyncStorage.setItem(LANGUAGE_KEY, next);
     setLangState(next);
-
-    const wantsRTL = isRTLLang(next);
-    if (I18nManager.isRTL !== wantsRTL) {
-      I18nManager.allowRTL(wantsRTL);
-      I18nManager.forceRTL(wantsRTL);
-      // Ne PAS appeler DevSettings.reload() ici : le rechargement JS
-      // immédiatement après un changement de I18nManager.forceRTL provoque
-      // une race condition sur le registre des modules natifs côté Expo Go
-      // ("Cannot find native module 'ExpoAsset'"). La mise en page RTL ne
-      // sera donc complète qu'après un redémarrage manuel de l'app — on le
-      // signale à l'appelant pour qu'il prévienne l'utilisateur.
-      return true;
-    }
-    return false;
   }, []);
 
   const t = useCallback(
@@ -71,7 +76,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <LanguageContext.Provider
-      value={{ lang, isRTL: I18nManager.isRTL, setLang, t }}
+      value={{ lang, isRTL: isRTLLang(lang), setLang, t }}
     >
       {children}
     </LanguageContext.Provider>

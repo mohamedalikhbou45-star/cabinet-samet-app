@@ -37,7 +37,7 @@ function initials(name?: string) {
 export function DashboardScreen() {
   const { user } = useAuth();
   const t = useTheme();
-  const { t: tr } = useLanguage();
+  const { t: tr, isRTL } = useLanguage();
   const navigation =
     useNavigation<BottomTabNavigationProp<AppTabsParamList>>();
   const [stats, setStats] = useState<Stats | null>(null);
@@ -152,7 +152,7 @@ export function DashboardScreen() {
             </TouchableOpacity>
           )}
 
-          <View style={styles.grid}>
+          <View style={[styles.grid, isRTL && styles.gridRTL]}>
             {cards.map((c) => (
               <View
                 key={c.label}
@@ -232,6 +232,7 @@ const styles = StyleSheet.create({
     gap: 12,
     marginBottom: 12,
   },
+  gridRTL: { flexDirection: "row-reverse" },
   card: {
     borderRadius: radius,
     padding: 18,

@@ -17,13 +17,33 @@ export type ApiUser = {
   role: "CLIENT" | "ADMIN";
 };
 
+// Jeton gardé en mémoire pour la durée du process, utilisé par toutes les
+// requêtes — indépendant de la persistance AsyncStorage (voir saveSession).
+let memoryToken: string | null = null;
+
 export async function getToken() {
+  if (memoryToken) return memoryToken;
   return AsyncStorage.getItem(TOKEN_KEY);
 }
 
-export async function saveSession(token: string, user: ApiUser) {
-  await AsyncStorage.setItem(TOKEN_KEY, token);
-  await AsyncStorage.setItem(USER_KEY, JSON.stringify(user));
+/**
+ * `persist=true` ("Rester connecté", coché par défaut) : le jeton survit à
+ * la fermeture de l'app (écrit dans AsyncStorage).
+ * `persist=false` : le jeton ne vit qu'en mémoire pour cette session — dès
+ * que l'app est tuée, l'utilisateur doit se reconnecter.
+ */
+export async function saveSession(
+  token: string,
+  user: ApiUser,
+  persist: boolean
+) {
+  memoryToken = token;
+  if (persist) {
+    await AsyncStorage.setItem(TOKEN_KEY, token);
+    await AsyncStorage.setItem(USER_KEY, JSON.stringify(user));
+  } else {
+    await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY]);
+  }
 }
 
 export async function getStoredUser(): Promise<ApiUser | null> {
@@ -32,6 +52,7 @@ export async function getStoredUser(): Promise<ApiUser | null> {
 }
 
 export async function clearSession() {
+  memoryToken = null;
   await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY]);
 }
 

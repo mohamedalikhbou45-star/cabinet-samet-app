@@ -15,7 +15,7 @@ export type AuthStackParamList = {
   TermsAccept: { name: string; email: string; password: string };
   TermsText: undefined;
   PrivacyText: undefined;
-  Verify2FA: { userId: string; email: string };
+  Verify2FA: { userId: string; email: string; keepSignedIn: boolean };
 };
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();

@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { SplashScreen } from "../screens/SplashScreen";
 import { AuthStack } from "./AuthStack";
 import { AppStack } from "./AppStack";
+import { BiometricGate } from "../components/BiometricGate";
 
 export function RootNavigator() {
   const { user, loading } = useAuth();
@@ -12,7 +13,13 @@ export function RootNavigator() {
 
   return (
     <NavigationContainer>
-      {user ? <AppStack /> : <AuthStack />}
+      {user ? (
+        <BiometricGate>
+          <AppStack />
+        </BiometricGate>
+      ) : (
+        <AuthStack />
+      )}
     </NavigationContainer>
   );
 }

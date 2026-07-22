@@ -58,12 +58,13 @@ function TabIcon({ name, focused, color }: { name: string; focused: boolean; col
 export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
   const t = useTheme();
-  const { t: tr } = useLanguage();
+  const { t: tr, isRTL } = useLanguage();
 
   return (
     <View
       style={[
         styles.bar,
+        isRTL && styles.barRTL,
         {
           backgroundColor: t.card,
           borderTopColor: t.border,
@@ -119,6 +120,7 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     paddingTop: 8,
   },
+  barRTL: { flexDirection: "row-reverse" },
   tab: {
     flex: 1,
     alignItems: "center",
