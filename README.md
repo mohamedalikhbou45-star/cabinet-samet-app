@@ -58,3 +58,16 @@ Notifications are sent through the Expo push API when an admin changes a documen
 ## Continuous integration
 
 Every push runs a GitHub Actions workflow that installs the dependencies and type-checks the code.
+
+## How I work with AI
+
+I build with AI coding agents (Claude Code) and treat them like a fast junior developer that needs clear direction:
+
+- **Context first:** [AGENTS.md](AGENTS.md) gives the agent the rules of this project (one API client, translations in three languages, right-to-left layout, theming), so it doesn't have to guess.
+- **Small, reviewable steps:** one feature or fix per change, and I read every diff before committing.
+- **I own the decisions:** I decide the screens and user flows. The agent helps implement them, and I test them on my phone.
+- **Automated checks:** CI (type-check) runs on every push, so mistakes from me or the agent are caught early.
+
+## About
+
+Built by Mohamed Ali Khbou, Computational Engineering Science student at TU Berlin.
