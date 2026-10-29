@@ -1,47 +1,60 @@
-# Cabinet Samet — App mobile
+# Cabinet Samet – Mobile App
 
-App React Native (Expo) pour les clients du Cabinet Samet, connectée au même
-backend Next.js que le site web (`~/Desktop/cabinet-digital`).
+The mobile app for clients of the Cabinet Samet accounting firm, built with React Native and Expo. It uses the same backend and accounts as the web portal: [cabinet-samet](https://github.com/mohamedalikhbou45-star/cabinet-samet).
 
-## Démarrer
+![CI](https://github.com/mohamedalikhbou45-star/cabinet-samet-app/actions/workflows/ci.yml/badge.svg)
+
+## Features
+
+- Login with email two-factor authentication, plus biometric unlock (Face ID / fingerprint)
+- Document upload by taking a photo in the app or picking a file
+- Dashboard, document history with processing status, and messages from the firm
+- Push notifications when a document's status changes
+- Help chatbot for common questions
+- Three languages: French, English and Arabic (with right-to-left layout)
+- Light and dark theme
+
+## Tech stack
+
+React Native, Expo, TypeScript, React Navigation, Expo Notifications, Expo Local Authentication, Expo Camera and Document Picker.
+
+## Run locally
+
+Start the backend first (`npm run dev` in the [cabinet-samet](https://github.com/mohamedalikhbou45-star/cabinet-samet) project), then:
 
 ```bash
 npm install
 npx expo start
 ```
 
-Scannez le QR code avec Expo Go, ou lancez `npx expo start --ios` / `--android`
-avec un simulateur installé.
+Scan the QR code with Expo Go, or press `i` / `a` to open an iOS simulator or Android emulator.
 
-## Connexion au backend
+### Backend URL
 
-L'URL de l'API est définie dans `app.json` sous `expo.extra.apiUrl`
-(par défaut `http://localhost:3000`). Le serveur Next.js doit tourner en
-local (`npm run dev` dans `cabinet-digital`).
+The API URL is set in `app.json` under `expo.extra.apiUrl` (default `http://localhost:3000`):
 
-- **Simulateur iOS** : `http://localhost:3000` fonctionne tel quel.
-- **Émulateur Android** : remplacez par `http://10.0.2.2:3000`.
-- **Appareil physique** : remplacez par l'adresse IP locale de votre machine
-  (ex. `http://192.168.1.23:3000`), les deux appareils devant être sur le
-  même réseau Wi-Fi.
+- **iOS simulator:** `http://localhost:3000` works as is.
+- **Android emulator:** use `http://10.0.2.2:3000`.
+- **Physical device:** use your computer's local IP, e.g. `http://192.168.1.23:3000`, with both devices on the same Wi-Fi.
 
-## Ce que l'app utilise côté backend
+## Backend routes used
 
-- `POST /api/mobile/login` — authentification (mêmes comptes que le site).
-- `POST /api/register` — création de compte.
-- `GET /api/dashboard` — statistiques + documents/messages récents.
-- `GET/POST /api/documents` — historique et dépôt de documents.
-- `GET /api/messages` — messages du cabinet.
-- `POST /api/push-token` — enregistrement du jeton de notification push Expo.
+| Route | Purpose |
+| --- | --- |
+| `POST /api/mobile/login` | Login (same accounts as the website) |
+| `POST /api/mobile/verify-2fa` | Verify the email code |
+| `POST /api/register` | Create an account |
+| `GET /api/dashboard` | Statistics, recent documents and messages |
+| `GET` / `POST /api/documents` | Document history and upload |
+| `GET /api/messages` | Messages from the firm |
+| `POST /api/push-token` | Register the Expo push token |
 
-Toutes ces routes acceptent un en-tête `Authorization: Bearer <token>` en plus
-du cookie de session utilisé par le site web (voir `src/lib/mobileAuth.ts`
-dans le projet backend).
+All routes accept an `Authorization: Bearer <token>` header in addition to the session cookie used by the website.
 
-## Notifications push
+## Push notifications
 
-Les notifications sont envoyées via l'API push d'Expo lorsqu'un admin change
-le statut d'un document (voir `src/lib/push.ts` côté backend). Pour les
-tester sur un appareil physique, un vrai build (dev client ou EAS build) est
-nécessaire — Expo Go a un support limité des notifications push depuis le
-SDK 53.
+Notifications are sent through the Expo push API when an admin changes a document's status. Testing them on a physical device needs a development build (dev client or EAS build); Expo Go has limited push support since SDK 53.
+
+## Continuous integration
+
+Every push runs a GitHub Actions workflow that installs the dependencies and type-checks the code.
