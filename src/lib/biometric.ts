@@ -3,7 +3,6 @@ import * as LocalAuthentication from "expo-local-authentication";
 
 const ENABLED_KEY = "cabinet-samet:biometricEnabled";
 const ASKED_KEY = "cabinet-samet:biometricAsked";
-const KEEP_SIGNED_IN_KEY = "cabinet-samet:keepSignedIn";
 
 export async function isBiometricEnabled() {
   return (await AsyncStorage.getItem(ENABLED_KEY)) === "true";
@@ -50,14 +49,4 @@ export async function authenticateWithBiometrics(promptMessage: string) {
     disableDeviceFallback: false,
   });
   return result.success;
-}
-
-export async function getKeepSignedIn(): Promise<boolean> {
-  const stored = await AsyncStorage.getItem(KEEP_SIGNED_IN_KEY);
-  // Coché par défaut tant que l'utilisateur n'a rien choisi explicitement.
-  return stored === null ? true : stored === "true";
-}
-
-export async function setKeepSignedIn(value: boolean) {
-  await AsyncStorage.setItem(KEEP_SIGNED_IN_KEY, String(value));
 }
